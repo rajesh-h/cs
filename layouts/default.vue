@@ -7,7 +7,7 @@
       fixed
       app
     >
-      <div class="hidden-sm-and-up pa-2 text-right">
+      <div class="hidden-md-and-up pa-2 text-right">
         <v-fab-transition>
           <v-btn fab small @click.stop="drawer = !drawer">
             <v-icon>mdi-close</v-icon>
@@ -73,7 +73,7 @@ export default {
     return {
       isDark: this.$vuetify.theme.dark,
       clipped: true,
-      drawer: true,
+      drawer: false,
       fixed: true,
       items: [
         {
