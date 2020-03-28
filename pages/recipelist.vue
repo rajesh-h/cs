@@ -77,28 +77,28 @@
     </v-flex>
 
     <v-btn
-      v-if="recipesLoaded"
+      v-if="recipesLoaded && !noMorePosts"
       outlined
       block
       class="ma-2"
-      :loading="paging.loading"
-      :disabled="paging.loading"
+      :loading="morePostsLoading"
+      :disabled="morePostsLoading"
       color="secondary"
-      @click="loadMoreRecipes"
+      @click="fetchMoreRecipes"
     >
       Load More Recipes
     </v-btn>
     <!-- <div v-scroll:#scroll-target="onScroll"></div> -->
     <!-- <v-card v-intersect="loadMoreRecipes"></v-card> -->
 
-    <v-btn v-if="paging.end" disabled block color="info">NO MORE RECIPES</v-btn>
+    <v-btn v-if="noMorePosts" disabled block color="info"
+      >NO MORE RECIPES</v-btn
+    >
   </v-layout>
 </template>
 
 <script>
-import moment from 'moment'
-import { mapActions, mapState } from 'vuex'
-import { StoreDB } from '@/services/fireinit.js'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: {},
@@ -110,7 +110,7 @@ export default {
 
   data() {
     return {
-      recipesLoaded: false,
+      // recipesLoaded: false,
       recipes: [],
       paging: {
         recipes_per_page: 6,
@@ -124,89 +124,25 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      latestRecipes: (state) => state.recipes.recipesList
-    })
+    ...mapGetters({
+      latestRecipes: 'recipes/getList'
+      // recipesLoaded: 'recipes/getInitialRecipesLoaded'
+    }),
+    recipesLoaded() {
+      return this.$store.state.recipes.initialRecipesLoaded
+    },
+    morePostsLoading() {
+      return this.$store.state.recipes.morePostsLoading
+    },
+    noMorePosts() {
+      return this.$store.state.recipes.noMorePosts
+    }
   },
-  created() {
-    this.ref.recipes = StoreDB.collection('recipes')
-      .where('publish', '==', true)
-      .orderBy('updated', 'desc')
-    const firstPage = this.ref.recipes.limit(this.paging.recipes_per_page)
-    this.fetchRecipes(firstPage)
-    this.fetchLatestRecipes()
-  },
+  created() {},
   methods: {
     ...mapActions({
-      fetchLatestRecipes: 'recipes/fetchRecipes'
-    }),
-    async fetchRecipes(ref) {
-      // const recipeArray = []
-
-      try {
-        this.paging.loading = true
-        await ref.get().then((querySnapshot) => {
-          /* If documentSnapshots is empty, then we have loaded all of pages */
-          if (querySnapshot.empty) {
-            this.paging.end = true
-            this.paging.loading = false
-            return
-          }
-          /* Append recipes to list of recipes */
-          querySnapshot.forEach((doc) => {
-            const UpdatedFmt = moment(new Date(doc.data().updated)).format(
-              'DD-MMM-YYYY hh:mm'
-            ) // date object
-            // recipeArray.push({
-            this.recipes.push({
-              ...doc.data(),
-              id: doc.id,
-              updatedFmt: UpdatedFmt
-            }) // Using spread operator to add ID of the document to array
-          })
-          // eslint-disable-next-line no-console
-          // console.log(this.recipes)
-          // this.latest6recipes = recipeArray
-          this.paging.loading = false
-          this.recipesLoaded = true
-
-          /* Build reference for next page */
-          const lastVisible = querySnapshot.docs[querySnapshot.size - 1]
-
-          if (!lastVisible) {
-          }
-
-          this.ref.recipesNext = this.ref.recipes
-            .startAfter(lastVisible)
-            .limit(this.paging.recipes_per_page)
-        })
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log(
-          'Error Fetching Data from firestore, As Precaution Error message is not printed here. Go Ahead and print error message on debug mode'
-        )
-        // eslint-disable-next-line no-console
-        // console.log(e)
-        // alert(e)
-        alert('Error Fetching Data, please contact Webmaster')
-      }
-    },
-
-    loadMoreRecipes() {
-      if (this.paging.end) {
-        return
-      }
-
-      this.paging.loading = true
-      this.fetchRecipes(this.ref.recipesNext).then(() => {
-        this.paging.loading = false
-
-        // if (documentSnapshots.empty) {
-        /* If there is no more recipes to load, set paging.end to true */
-        // this.paging.end = true
-        // }
-      })
-    }
+      fetchMoreRecipes: 'recipes/appendList'
+    })
   }
 }
 </script>
