@@ -32,6 +32,7 @@ export default {
    */
   plugins: [
     // '~/plugins/fireauth.js'
+    '@plugins/firebase.js'
   ],
   /*
    ** Nuxt.js dev-modules

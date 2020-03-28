@@ -67,10 +67,10 @@
 
               <v-spacer></v-spacer>
               <div>
-                <v-btn icon color="secondary">
+                <v-btn icon>
                   <v-icon>mdi-bookmark-outline</v-icon>
                 </v-btn>
-                <v-btn icon color="secondary">
+                <v-btn icon>
                   <v-icon>mdi-share-variant</v-icon>
                 </v-btn>
               </div>

@@ -21,7 +21,7 @@
       </div> -->
       <v-row v-if="recipesLoaded">
         <v-col
-          v-for="(recipe, i) in recipes"
+          v-for="(recipe, i) in latestRecipes"
           :key="i"
           cols="12"
           sm="6"
@@ -50,13 +50,12 @@
           </v-card>
           <v-card>
             <v-card-actions>
-              <v-card-subtitle class="pa-2"
-                >{{ recipe.updatedFmt | truncate(11, '') }}
-                <v-btn outlined text
+              <v-card-subtitle class="pa-0">
+                <v-btn outlined text disabled
                   ><v-icon small left>mdi-account-group</v-icon
                   >{{ recipe.serves }}
                 </v-btn>
-                <v-btn outlined text
+                <v-btn outlined text disabled
                   ><v-icon small left>mdi-clock-outline</v-icon
                   >{{ recipe.totalTime }}
                 </v-btn>
@@ -64,10 +63,10 @@
 
               <v-spacer></v-spacer>
               <div>
-                <v-btn icon color="secondary">
+                <v-btn icon>
                   <v-icon>mdi-bookmark-outline</v-icon>
                 </v-btn>
-                <v-btn icon color="secondary">
+                <v-btn icon>
                   <v-icon>mdi-share-variant</v-icon>
                 </v-btn>
               </div>
@@ -98,6 +97,7 @@
 
 <script>
 import moment from 'moment'
+import { mapActions, mapState } from 'vuex'
 import { StoreDB } from '@/services/fireinit.js'
 
 export default {
@@ -107,6 +107,7 @@ export default {
       return text.substring(0, length) + suffix
     }
   },
+
   data() {
     return {
       recipesLoaded: false,
@@ -122,14 +123,23 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapState({
+      latestRecipes: (state) => state.recipes.recipesList
+    })
+  },
   created() {
     this.ref.recipes = StoreDB.collection('recipes')
       .where('publish', '==', true)
       .orderBy('updated', 'desc')
     const firstPage = this.ref.recipes.limit(this.paging.recipes_per_page)
     this.fetchRecipes(firstPage)
+    this.fetchLatestRecipes()
   },
   methods: {
+    ...mapActions({
+      fetchLatestRecipes: 'recipes/fetchRecipes'
+    }),
     async fetchRecipes(ref) {
       // const recipeArray = []
 
