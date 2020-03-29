@@ -51,9 +51,11 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title>
-        <v-img :src="require('~/static/logo.png')"></v-img>
+        <router-link to="/" class="toolbar-title"
+          ><v-img :src="require('~/static/logo.png')"></v-img
+        ></router-link>
       </v-toolbar-title>
     </v-app-bar>
     <v-content>
@@ -73,7 +75,7 @@ export default {
     return {
       isDark: this.$vuetify.theme.dark,
       clipped: true,
-      drawer: false,
+      drawer: null,
       fixed: true,
       items: [
         {
@@ -98,6 +100,7 @@ export default {
       title: 'Vuetify.js'
     }
   },
+  computed: {},
   mounted() {
     const theme = localStorage.getItem('useDarkTheme')
     if (theme) {

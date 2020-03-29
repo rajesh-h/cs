@@ -1,7 +1,7 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex>
-      <div v-if="loading" class="text-center">
+      <div v-if="$fetchState.pending" class="text-center">
         <v-progress-circular
           :size="70"
           :width="7"
@@ -9,7 +9,10 @@
           indeterminate
         ></v-progress-circular>
       </div>
-      <v-row v-if="!loading">
+      <div v-else-if="$fetchState.error">
+        Error while fetching Recipe: Please contact Webmaster
+      </div>
+      <v-row v-else>
         <v-col cols="12" sm="12" md="9" lg="9">
           <v-card class="mx-auto">
             <v-img
@@ -200,58 +203,58 @@
   </v-layout>
 </template>
 <script>
-import moment from 'moment'
-import { StoreDB } from '@/services/fireinit.js'
-
+import { mapGetters } from 'vuex'
 export default {
+  async fetch({ params, store }) {
+    // eslint-disable-next-line no-console
+    // console.log('Inside fetch ' + params.slug)
+    await store.dispatch('recipes/fetchRecipeDetail', params.slug)
+  },
+  // async asyncData({ params }) {
+  //   // eslint-disable-next-line no-console
+  //   // console.log(store.state.recipes.recipesList)
+  //   const requestedPost = []
+  //   const response = StoreDB.collection('recipes')
+  //   await response
+  //     .where('slug', '==', params.slug)
+  //     .limit(1)
+  //     .get()
+  //     .then((querySnapshot) => {
+  //       querySnapshot.forEach((doc) => {
+  //         const UpdatedFmt = moment(new Date(doc.data().updated)).format(
+  //           'DD-MMM-YYYY hh:mm'
+  //         ) // date object
+  //         requestedPost.push({
+  //           ...doc.data(),
+  //           id: doc.id,
+  //           updatedFmt: UpdatedFmt
+  //         }) // Using spread operator to add ID of the document to array
+  //       })
+  //     })
+  //     .catch(() => {
+  //       // eslint-disable-next-line no-console
+  //       console.log('Something went wrong here, Enable Debug')
+  //       // make sure to change catch method to add (e) for debug .catch((e) => {
+  //       // eslint-disable-next-line no-console
+  //       // console.log()
+  //     })
+  //   return {
+  //     recipe: requestedPost[0]
+  //   }
+  // },
   data: () => ({
-    recipe: {},
     loading: true
   }),
-  created() {
-    this.fetchSingleRecipe(this.$route.params.slug)
+  computed: {
+    ...mapGetters({
+      recipe: 'recipes/getRecipeDetail'
+      // recipesLoaded: 'recipes/getInitialRecipesLoaded'
+    })
   },
-  methods: {
-    async fetchSingleRecipe(slug) {
-      // Fetch Single Recipe by passing Id
-      const requestedPost = []
-      const response = StoreDB.collection('recipes')
-      try {
-        await response
-          .where('slug', '==', slug)
-          .limit(1)
-          .get()
-          .then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-              const UpdatedFmt = moment(new Date(doc.data().updated)).format(
-                'DD-MMM-YYYY hh:mm'
-              ) // date object
-              requestedPost.push({
-                ...doc.data(),
-                id: doc.id,
-                updatedFmt: UpdatedFmt
-              }) // Using spread operator to add ID of the document to array
-              this.recipe = requestedPost[0]
-              this.loading = false
-            })
-          })
-        // eslint-disable-next-line no-console
-        console.log(this.recipe)
-        // eslint-disable-next-line no-console
-        // console.log(newAddedRecipe.data())
-        // eslint-disable-next-line no-console
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log(
-          'Error Fetching Data from firestore, As Precaution Error message is not printed here. Go Ahead and print error message on debug mode'
-        )
-        // eslint-disable-next-line no-console
-        console.log(e)
-        // alert(e)
-        alert('Error Fetching Data, please contact Webmaster')
-      }
-    }
-  }
+  mounted() {
+    this.loading = false
+  },
+  methods: {}
 }
 </script>
 <style lang="scss"></style>

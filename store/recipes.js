@@ -6,12 +6,14 @@ export const state = () => ({
   lastRecipe: null,
   initialRecipesLoaded: false,
   morePostsLoading: false,
-  noMorePosts: false
+  noMorePosts: false,
+  recipeDetail: {}
 })
 
 export const getters = {
   getList: (state) => state.recipesList,
-  getInitialRecipesLoaded: (state) => state.initialRecipesLoaded
+  getInitialRecipesLoaded: (state) => state.initialRecipesLoaded,
+  getRecipeDetail: (state) => state.recipeDetail
 }
 export const actions = {
   async fetchList({ commit }) {
@@ -42,12 +44,12 @@ export const actions = {
         commit('setLast', lastVisible.data().updated) // This is the cursor to be used for next set
         commit('setList', recipeArray)
       })
-      .catch((e) => {
+      .catch(() => {
         // eslint-disable-next-line no-console
         console.log('Something went wrong here, Enable Debug')
         // make sure to change catch method to add (e) for debug .catch((e) => {
         // eslint-disable-next-line no-console
-        console.log(e)
+        // console.log(e)
       })
   },
   async appendList({ commit, state }) {
@@ -88,6 +90,33 @@ export const actions = {
         // make sure to change catch method to add (e) for debug .catch((e) => {
         // console.log(e)
       })
+  },
+  async fetchRecipeDetail({ commit }, slug) {
+    const requestedPost = []
+    return await StoreDB.collection('recipes')
+      .where('slug', '==', slug)
+      .limit(1)
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const UpdatedFmt = moment(new Date(doc.data().updated)).format(
+            'DD-MMM-YYYY hh:mm'
+          ) // date object
+          requestedPost.push({
+            ...doc.data(),
+            id: doc.id,
+            updatedFmt: UpdatedFmt
+          }) // Using spread operator to add ID of the document to array
+        })
+        commit('setRecipeDetail', requestedPost[0])
+      })
+      .catch(() => {
+        // eslint-disable-next-line no-console
+        console.log('Something went wrong here, Enable Debug')
+        // make sure to change catch method to add (e) for debug .catch((e) => {
+        // eslint-disable-next-line no-console
+        // console.log(e)
+      })
   }
 }
 
@@ -107,6 +136,9 @@ export const mutations = {
   },
   setNoMorePosts(state, payload) {
     state.noMorePosts = payload
+  },
+  setRecipeDetail(state, payload) {
+    state.recipeDetail = payload
   }
   // setRecipes: (state, recipesList) => (state.recipesList = recipesList)
 }
