@@ -112,19 +112,7 @@ export default {
   },
 
   data() {
-    return {
-      // recipesLoaded: false,
-      recipes: [],
-      paging: {
-        recipes_per_page: 6,
-        end: false,
-        loading: false
-      },
-      ref: {
-        recipes: null,
-        recipesNext: null
-      }
-    }
+    return {}
   },
   computed: {
     ...mapGetters({

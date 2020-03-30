@@ -7,13 +7,15 @@ export const state = () => ({
   initialRecipesLoaded: false,
   morePostsLoading: false,
   noMorePosts: false,
-  recipeDetail: {}
+  recipeDetail: {},
+  noSingleRecipeFetched: false
 })
 
 export const getters = {
   getList: (state) => state.recipesList,
   getInitialRecipesLoaded: (state) => state.initialRecipesLoaded,
-  getRecipeDetail: (state) => state.recipeDetail
+  getRecipeDetail: (state) => state.recipeDetail,
+  getNoSingleRecipeFetched: (state) => state.getNoSingleRecipeFetched
 }
 export const actions = {
   async fetchList({ commit }) {
@@ -98,17 +100,24 @@ export const actions = {
       .limit(1)
       .get()
       .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          const UpdatedFmt = moment(new Date(doc.data().updated)).format(
-            'DD-MMM-YYYY hh:mm'
-          ) // date object
-          requestedPost.push({
-            ...doc.data(),
-            id: doc.id,
-            updatedFmt: UpdatedFmt
-          }) // Using spread operator to add ID of the document to array
-        })
-        commit('setRecipeDetail', requestedPost[0])
+        if (querySnapshot.empty) {
+          commit('setNoSingleRecipeFetched', true)
+          // eslint-disable-next-line no-console
+          console.log('Query empty')
+        } else {
+          querySnapshot.forEach((doc) => {
+            const UpdatedFmt = moment(new Date(doc.data().updated)).format(
+              'DD-MMM-YYYY hh:mm'
+            ) // date object
+            requestedPost.push({
+              ...doc.data(),
+              id: doc.id,
+              updatedFmt: UpdatedFmt
+            }) // Using spread operator to add ID of the document to array
+          })
+
+          commit('setRecipeDetail', requestedPost[0])
+        }
       })
       .catch(() => {
         // eslint-disable-next-line no-console
@@ -139,6 +148,9 @@ export const mutations = {
   },
   setRecipeDetail(state, payload) {
     state.recipeDetail = payload
+  },
+  setNoSingleRecipeFetched(state, payload) {
+    state.noSingleRecipeFetched = payload
   }
   // setRecipes: (state, recipesList) => (state.recipesList = recipesList)
 }

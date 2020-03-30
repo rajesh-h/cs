@@ -1,7 +1,7 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex>
-      <div v-if="$fetchState.pending" class="text-center">
+      <div v-if="loading" class="text-center">
         <v-progress-circular
           :size="70"
           :width="7"
@@ -9,7 +9,7 @@
           indeterminate
         ></v-progress-circular>
       </div>
-      <div v-else-if="$fetchState.error">
+      <div v-if="noRecipeFetched">
         Error while fetching Recipe: Please contact Webmaster
       </div>
       <v-row v-else>
@@ -205,50 +205,17 @@
 <script>
 import { mapGetters } from 'vuex'
 export default {
-  async fetch({ params, store }) {
-    // eslint-disable-next-line no-console
-    // console.log('Inside fetch ' + params.slug)
+  async asyncData({ params, store }) {
     await store.dispatch('recipes/fetchRecipeDetail', params.slug)
   },
-  // async asyncData({ params }) {
-  //   // eslint-disable-next-line no-console
-  //   // console.log(store.state.recipes.recipesList)
-  //   const requestedPost = []
-  //   const response = StoreDB.collection('recipes')
-  //   await response
-  //     .where('slug', '==', params.slug)
-  //     .limit(1)
-  //     .get()
-  //     .then((querySnapshot) => {
-  //       querySnapshot.forEach((doc) => {
-  //         const UpdatedFmt = moment(new Date(doc.data().updated)).format(
-  //           'DD-MMM-YYYY hh:mm'
-  //         ) // date object
-  //         requestedPost.push({
-  //           ...doc.data(),
-  //           id: doc.id,
-  //           updatedFmt: UpdatedFmt
-  //         }) // Using spread operator to add ID of the document to array
-  //       })
-  //     })
-  //     .catch(() => {
-  //       // eslint-disable-next-line no-console
-  //       console.log('Something went wrong here, Enable Debug')
-  //       // make sure to change catch method to add (e) for debug .catch((e) => {
-  //       // eslint-disable-next-line no-console
-  //       // console.log()
-  //     })
-  //   return {
-  //     recipe: requestedPost[0]
-  //   }
-  // },
+
   data: () => ({
     loading: true
   }),
   computed: {
     ...mapGetters({
-      recipe: 'recipes/getRecipeDetail'
-      // recipesLoaded: 'recipes/getInitialRecipesLoaded'
+      recipe: 'recipes/getRecipeDetail',
+      noRecipeFetched: 'recipes/getNoSingleRecipeFetched'
     })
   },
   mounted() {
