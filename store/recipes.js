@@ -15,7 +15,7 @@ export const getters = {
   getList: (state) => state.recipesList,
   getInitialRecipesLoaded: (state) => state.initialRecipesLoaded,
   getRecipeDetail: (state) => state.recipeDetail,
-  getNoSingleRecipeFetched: (state) => state.getNoSingleRecipeFetched
+  getNoSingleRecipeFetched: (state) => state.noSingleRecipeFetched
 }
 export const actions = {
   async fetchList({ commit }) {
@@ -93,39 +93,45 @@ export const actions = {
         // console.log(e)
       })
   },
-  async fetchRecipeDetail({ commit }, slug) {
+  async fetchRecipeDetail({ commit, state }, slug) {
+    commit('setNoSingleRecipeFetched', false)
     const requestedPost = []
-    return await StoreDB.collection('recipes')
-      .where('slug', '==', slug)
-      .limit(1)
-      .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.empty) {
-          commit('setNoSingleRecipeFetched', true)
+    const found = state.recipesList.find((x) => x.slug === slug)
+    if (found) {
+      commit('setRecipeDetail', found)
+      return await true
+    } else {
+      return await StoreDB.collection('recipes')
+        .where('slug', '==', slug)
+        .limit(1)
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+            commit('setNoSingleRecipeFetched', true)
+            // eslint-disable-next-line no-console
+            console.log('Query empty')
+          } else {
+            querySnapshot.forEach((doc) => {
+              const UpdatedFmt = moment(new Date(doc.data().updated)).format(
+                'DD-MMM-YYYY hh:mm'
+              ) // date object
+              requestedPost.push({
+                ...doc.data(),
+                id: doc.id,
+                updatedFmt: UpdatedFmt
+              }) // Using spread operator to add ID of the document to array
+            })
+            commit('setRecipeDetail', requestedPost[0])
+          }
+        })
+        .catch(() => {
           // eslint-disable-next-line no-console
-          console.log('Query empty')
-        } else {
-          querySnapshot.forEach((doc) => {
-            const UpdatedFmt = moment(new Date(doc.data().updated)).format(
-              'DD-MMM-YYYY hh:mm'
-            ) // date object
-            requestedPost.push({
-              ...doc.data(),
-              id: doc.id,
-              updatedFmt: UpdatedFmt
-            }) // Using spread operator to add ID of the document to array
-          })
-
-          commit('setRecipeDetail', requestedPost[0])
-        }
-      })
-      .catch(() => {
-        // eslint-disable-next-line no-console
-        console.log('Something went wrong here, Enable Debug')
-        // make sure to change catch method to add (e) for debug .catch((e) => {
-        // eslint-disable-next-line no-console
-        // console.log(e)
-      })
+          console.log('Something went wrong here, Enable Debug')
+          // make sure to change catch method to add (e) for debug .catch((e) => {
+          // eslint-disable-next-line no-console
+          // console.log(e)
+        })
+    }
   }
 }
 

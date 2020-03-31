@@ -1,7 +1,7 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex>
-      <v-row v-if="!recipesLoaded">
+      <v-row v-if="false">
         <v-col v-for="(n, i) in 6" :key="i" cols="12" sm="6" md="6" lg="4">
           <v-skeleton-loader
             class="mx-auto"
@@ -19,6 +19,7 @@
           indeterminate
         ></v-progress-circular>
       </div> -->
+
       <v-row v-if="recipesLoaded">
         <v-col
           v-for="(recipe, i) in latestRecipes"
@@ -63,10 +64,10 @@
 
               <v-spacer></v-spacer>
               <div>
-                <v-btn icon>
+                <v-btn icon @click="setOrRemoveBookmark">
                   <v-icon>mdi-bookmark-outline</v-icon>
                 </v-btn>
-                <v-btn icon>
+                <v-btn icon @click="shareRecipe">
                   <v-icon>mdi-share-variant</v-icon>
                 </v-btn>
               </div>
@@ -88,6 +89,7 @@
     >
       Load More Recipes
     </v-btn>
+
     <!-- <div v-scroll:#scroll-target="onScroll"></div> -->
     <!-- <v-card v-intersect="loadMoreRecipes"></v-card> -->
 
@@ -133,7 +135,13 @@ export default {
   methods: {
     ...mapActions({
       fetchMoreRecipes: 'recipes/appendList'
-    })
+    }),
+    setOrRemoveBookmark() {
+      alert('This Feature To be introduced')
+    },
+    shareRecipe() {
+      alert('This Feature To be introduced')
+    }
   }
 }
 </script>
