@@ -15,8 +15,11 @@
     "@nuxt/typescript-runtime": "^0.4.0",
     "@nuxtjs/axios": "^5.3.6",
     "@nuxtjs/pwa": "^3.0.0-0",
+    "cookieparser": "^0.1.0",
     "core-js": "2.6.10",
     "firebase": "^7.12.0",
+    "js-cookie": "^2.2.1",
+    "jwt-decode": "^2.2.0",
     "moment": "^2.24.0",
     "nuxt": "^2.0.0"
   },

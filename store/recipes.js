@@ -12,18 +12,26 @@ export const state = () => ({
 })
 
 export const getters = {
-  getList: (state) => state.recipesList,
-  getInitialRecipesLoaded: (state) => state.initialRecipesLoaded,
-  getRecipeDetail: (state) => state.recipeDetail,
-  getNoSingleRecipeFetched: (state) => state.noSingleRecipeFetched
+  list: (state) => state.recipesList,
+  initialRecipesLoaded: (state) => state.initialRecipesLoaded,
+  recipeDetail: (state) => state.recipeDetail,
+  noSingleRecipeFetched: (state) => state.noSingleRecipeFetched
 }
 export const actions = {
-  async fetchList({ commit }) {
+  async fetchList({ commit }, payload) {
     const recipeArray = []
-    return await StoreDB.collection('recipes')
-      .where('publish', '==', true)
-      .orderBy('updated', 'desc')
-      .limit(6)
+    let response
+    if (payload.forDashboard) {
+      response = StoreDB.collection('recipes')
+        .orderBy('updated', 'desc')
+        .limit(payload.limit)
+    } else {
+      response = StoreDB.collection('recipes')
+        .where('publish', '==', true)
+        .orderBy('updated', 'desc')
+        .limit(payload.limit)
+    }
+    return await response
       .get()
       .then((querySnapshot) => {
         if (querySnapshot.empty) {
@@ -54,14 +62,23 @@ export const actions = {
         // console.log(e)
       })
   },
-  async appendList({ commit, state }) {
+  async appendList({ commit, state }, payload) {
     commit('setMorePostsLoading', true)
     const recipeArray = []
-    return await StoreDB.collection('recipes')
-      .where('publish', '==', true)
-      .orderBy('updated', 'desc')
-      .startAfter(state.lastRecipe)
-      .limit(6)
+    let response
+    if (payload.forDashboard) {
+      response = StoreDB.collection('recipes')
+        .orderBy('updated', 'desc')
+        .startAfter(state.lastRecipe)
+        .limit(payload.limit)
+    } else {
+      response = StoreDB.collection('recipes')
+        .where('publish', '==', true)
+        .orderBy('updated', 'desc')
+        .startAfter(state.lastRecipe)
+        .limit(payload.limit)
+    }
+    return await response
       .get()
       .then((querySnapshot) => {
         if (querySnapshot.empty) {
@@ -132,6 +149,72 @@ export const actions = {
           // console.log(e)
         })
     }
+  },
+  async addRecipe({ dispatch }, dataArray) {
+    const response = StoreDB.collection('recipes')
+    try {
+      await response.add(dataArray).then((res) => {
+        // eslint-disable-next-line no-console
+        // console.log('Added document with ID: ', res.id)
+        const newID = res.id // Id received from the added recipe
+        dispatch('fetchRecipeDetailBasedOnId', newID) // Pass the newID as param for this action
+      })
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('There was a error adding data')
+      // eslint-disable-next-line no-console
+      console.log(e)
+
+      alert(e)
+      return
+    }
+    alert('New Recipe Added.')
+  },
+  async editRecipe({}, dataArray) {
+    // eslint-disable-next-line no-console
+    // console.log(dataArray)
+    const ID = dataArray.id
+    // console.log ()
+    const response = StoreDB.collection('recipes').doc(ID)
+    try {
+      await response.set(dataArray, { merge: true }).then(() => {
+        // eslint-disable-next-line no-console
+        // console.log(res)
+        // eslint-disable-next-line no-console
+        // console.log('Added document with ID: ', res.id)
+        // const newID = res.id // Id received from the added recipe
+        // dispatch('fetchRecipeDetailBasedOnId', ID) // Pass the newID as param for this action
+      })
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('There was a error editing data')
+      // eslint-disable-next-line no-console
+      console.log(e)
+
+      alert(e)
+      return
+    }
+    alert('Recipe Edited.')
+  },
+  async fetchRecipeDetailBasedOnId({ commit }, newID) {
+    const response = StoreDB.collection('recipes').doc(newID)
+    try {
+      const newAddedRecipe = await response.get()
+      // eslint-disable-next-line no-console
+      // console.log(newAddedRecipe.data())
+      if (newAddedRecipe.data().publish === true) {
+        commit('addNewRecipeToList', { ...newAddedRecipe.data(), id: newID })
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(
+        'Error Fetching Data from firestore, As Precaution Error message is not printed here. Go Ahead and print error message on debug mode'
+      )
+      // eslint-disable-next-line no-console
+      // console.log(e)
+      // alert(e)
+      alert('Error Fetching Data, please contact Webmaster')
+    }
   }
 }
 
@@ -157,6 +240,9 @@ export const mutations = {
   },
   setNoSingleRecipeFetched(state, payload) {
     state.noSingleRecipeFetched = payload
+  },
+  addNewRecipeToList(state, recipe) {
+    state.recipesList.unshift(recipe)
   }
   // setRecipes: (state, recipesList) => (state.recipesList = recipesList)
 }

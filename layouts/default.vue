@@ -87,12 +87,13 @@ export default {
           icon: 'mdi-chef-hat',
           title: 'About',
           to: '/about'
-        },
-        {
-          icon: 'mdi-bookmark-multiple',
-          title: 'Bookmarks',
-          to: '/bookmarks'
         }
+        // ,
+        // {
+        //   icon: 'mdi-bookmark-multiple',
+        //   title: 'Bookmarks',
+        //   to: '/bookmarks'
+        // }
       ],
       miniVariant: false,
       right: true,

@@ -34,6 +34,11 @@ export default {
     // '~/plugins/fireauth.js'
     '@plugins/firebase.js'
   ],
+
+  /* Middleware */
+  router: {
+    middleware: ['authenticated']
+  },
   /*
    ** Nuxt.js dev-modules
    */
@@ -79,6 +84,7 @@ export default {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) {}
+    extend(config, ctx) {},
+    transpile: []
   }
 }
