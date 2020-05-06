@@ -97,9 +97,9 @@ export default {
       return text.substring(0, length) + suffix
     }
   },
-  async fetch({ store }) {
-    const payload = { forDashboard: false, limit: 6 }
-    await store.dispatch('recipes/fetchList', payload)
+  async fetch({ params, store }) {
+    const payload = { forDashboard: false, limit: 6, category: params.slug }
+    await store.dispatch('recipes/fetchCategorySearchResults', payload)
   },
 
   data() {
@@ -109,7 +109,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      latestRecipes: 'recipes/list'
+      latestRecipes: 'recipes/categorySearchResults'
       // recipesLoaded: 'recipes/getInitialRecipesLoaded'
     }),
     recipesLoaded() {
@@ -142,13 +142,13 @@ export default {
   },
   head() {
     return {
-      title: 'Cooking Shooking',
+      title: this.$route.params.slug,
       meta: [
         // hid is used as unique identifier. Do not use `vmid` for it as it will not work
         {
-          hid: 'cookingshooking',
-          name: 'Cooking Shooking',
-          content: 'Cooking Shooking'
+          hid: this.$route.params.slug,
+          name: this.$route.params.slug,
+          content: this.$route.params.slug
         }
       ]
     }

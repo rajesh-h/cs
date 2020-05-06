@@ -1,9 +1,32 @@
 <template>
-  <RecipeForm
-    :recipe-array="recipeArray"
-    :edit-slug="editSlug"
-    :edit-page="true"
-  />
+  <v-container>
+    <v-row>
+      <v-col cols="12">
+        <v-row justify="space-between" align="center">
+          <v-col cols="3">
+            <div>
+              <h3>
+                EDIT RECIPE
+              </h3>
+            </div>
+          </v-col>
+          <v-col cols="6" class="text-right">
+            <v-row>
+              <v-col>
+                <v-btn class="primary" @click="gotoAdmin">GO TO ADMIN</v-btn>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+
+    <RecipeForm
+      :recipe-array="recipeArray"
+      :edit-slug="editSlug"
+      :edit-page="true"
+    />
+  </v-container>
 </template>
 
 <script>
@@ -63,6 +86,11 @@ export default {
           // eslint-disable-next-line no-console
           // console.log(e)
         })
+    },
+    gotoAdmin() {
+      this.$router.push({
+        name: 'admin'
+      })
     }
   }
 }

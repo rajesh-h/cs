@@ -1,5 +1,22 @@
 <template>
-  <v-container column justify-center align-center>
+  <v-container>
+    <v-form>
+      <v-row>
+        <v-col cols="12" md="8" sm="8" lg="8" xl="8">
+          <v-text-field v-model="searchText" label="Search"></v-text-field>
+        </v-col>
+        <v-col cols="6" md="2" sm="2" lg="2" xl="2" class="pt-6">
+          <v-btn block color="primary" @click="searchRecipes">
+            SEARCH
+          </v-btn>
+        </v-col>
+        <v-col cols="6" md="2" sm="2" lg="2" xl="2" class="pt-6">
+          <v-btn block color="info" @click="gotoHome">
+            GO BACK
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
     <v-row v-if="loading">
       <v-col v-for="(n, i) in 6" :key="i" cols="12" sm="6" md="6" lg="4">
         <v-skeleton-loader
@@ -89,29 +106,25 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-
 export default {
-  components: {},
   filters: {
     truncate(text, length, suffix) {
       return text.substring(0, length) + suffix
     }
   },
-  async fetch({ store }) {
-    const payload = { forDashboard: false, limit: 6 }
-    await store.dispatch('recipes/fetchList', payload)
-  },
 
   data() {
     return {
+      searchText: '',
       loading: true
     }
   },
   computed: {
     ...mapGetters({
-      latestRecipes: 'recipes/list'
+      latestRecipes: 'recipes/tagSearchResults'
       // recipesLoaded: 'recipes/getInitialRecipesLoaded'
     }),
+
     recipesLoaded() {
       return this.$store.state.recipes.initialRecipesLoaded
     },
@@ -128,8 +141,19 @@ export default {
   created() {},
   methods: {
     ...mapActions({
-      fetchMore: 'recipes/appendList'
+      fetchMore: 'recipes/appendList',
+      tagSearch: 'recipes/fetchTagSearchResults',
+      setLoadMorePostsBoolean: 'recipes/setLoadMorePostsBoolean'
     }),
+    searchRecipes() {
+      if (this.searchText) {
+        this.tagSearch({
+          forDashboard: false,
+          limit: 6,
+          tag: this.searchText
+        })
+      }
+    },
     fetchMoreRecipes() {
       this.fetchMore({ forDashboard: false, limit: 6 })
     },
@@ -138,17 +162,24 @@ export default {
     },
     shareRecipe() {
       alert('This Feature To be introduced')
+    },
+
+    gotoHome() {
+      this.setLoadMorePostsBoolean(false)
+      this.$router.push({
+        name: 'index'
+      })
     }
   },
   head() {
     return {
-      title: 'Cooking Shooking',
+      title: this.$route.params.slug,
       meta: [
         // hid is used as unique identifier. Do not use `vmid` for it as it will not work
         {
-          hid: 'cookingshooking',
-          name: 'Cooking Shooking',
-          content: 'Cooking Shooking'
+          hid: this.$route.params.slug,
+          name: this.$route.params.slug,
+          content: this.$route.params.slug
         }
       ]
     }

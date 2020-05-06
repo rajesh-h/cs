@@ -10,8 +10,13 @@
               </h3>
             </div>
           </v-col>
-          <v-col cols="4" class="text-right">
+          <v-col cols="6" class="text-right">
             <v-row>
+              <v-col>
+                <v-btn class="primary" @click="editCategory"
+                  >Edit Category</v-btn
+                >
+              </v-col>
               <v-col>
                 <v-btn class="primary" @click="newRecipe">Add New</v-btn>
               </v-col>
@@ -130,6 +135,11 @@ export default {
     },
     newRecipe() {
       this.$router.push({ name: 'admin-add' })
+    },
+    editCategory() {
+      this.$router.push({
+        name: 'categories-edit'
+      })
     }
   }
 }

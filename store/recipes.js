@@ -8,14 +8,20 @@ export const state = () => ({
   morePostsLoading: false,
   noMorePosts: false,
   recipeDetail: {},
-  noSingleRecipeFetched: false
+  noSingleRecipeFetched: false,
+  categories: [],
+  categorySearchResults: [],
+  tagSearchResults: []
 })
 
 export const getters = {
   list: (state) => state.recipesList,
   initialRecipesLoaded: (state) => state.initialRecipesLoaded,
   recipeDetail: (state) => state.recipeDetail,
-  noSingleRecipeFetched: (state) => state.noSingleRecipeFetched
+  noSingleRecipeFetched: (state) => state.noSingleRecipeFetched,
+  categories: (state) => state.categories,
+  categorySearchResults: (state) => state.categorySearchResults,
+  tagSearchResults: (state) => state.tagSearchResults
 }
 export const actions = {
   async fetchList({ commit }, payload) {
@@ -215,6 +221,130 @@ export const actions = {
       // alert(e)
       alert('Error Fetching Data, please contact Webmaster')
     }
+  },
+  async fetchCategories({ commit }) {
+    const response = StoreDB.collection('categories').doc('categories')
+    try {
+      const categories = await response.get()
+      commit('setCategories', categories.data().categories)
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(
+        'Error Fetching Data from firestore, As Precaution Error message is not printed here. Go Ahead and print error message on debug mode'
+      )
+      alert('Error Fetching Data, please contact Webmaster')
+    }
+  },
+  async fetchCategorySearchResults({ commit }, payload) {
+    const recipeArray = []
+    let response
+    if (payload.forDashboard) {
+      response = StoreDB.collection('recipes')
+        .orderBy('updated', 'desc')
+        .limit(payload.limit)
+    } else {
+      response = StoreDB.collection('recipes')
+        .where('publish', '==', true)
+        .where('categories', 'array-contains', payload.category)
+        .orderBy('updated', 'desc')
+        .limit(payload.limit)
+    }
+    return await response
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.empty) {
+          commit('setNoMorePosts', true)
+          return
+        }
+        const lastVisible = querySnapshot.docs[querySnapshot.size - 1]
+        querySnapshot.forEach((doc) => {
+          const UpdatedFmt = moment(new Date(doc.data().updated)).format(
+            'DD-MMM-YYYY hh:mm'
+          ) // date object
+          recipeArray.push({
+            ...doc.data(),
+            id: doc.id,
+            updatedFmt: UpdatedFmt
+          }) // Using spread operator to add ID of the document to array
+        })
+        // eslint-disable-next-line no-console
+        // console.log(lastVisible.data().updated.toString())
+        commit('setLast', lastVisible.data().updated) // This is the cursor to be used for next set
+        commit('setCategorySearchResults', recipeArray)
+      })
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.log('Something went wrong here, Enable Debug')
+        // make sure to change catch method to add (e) for debug .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.log(e)
+      })
+  },
+  async updateCategories({ state }) {
+    const response = StoreDB.collection('categories').doc('categories')
+    try {
+      await response.set({ categories: state.categories }).then(() => {})
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('There was a error editing data')
+      // eslint-disable-next-line no-console
+      console.log(e)
+
+      alert(e)
+      return
+    }
+    alert('Categories Edited.')
+  },
+  async fetchTagSearchResults({ commit }, payload) {
+    const recipeArray = []
+    let response
+    if (payload.forDashboard) {
+      response = StoreDB.collection('recipes')
+        .orderBy('updated', 'desc')
+        .limit(payload.limit)
+    } else {
+      response = StoreDB.collection('recipes')
+        .where('publish', '==', true)
+        .where('postTags', 'array-contains', payload.tag)
+        .orderBy('updated', 'desc')
+        .limit(payload.limit)
+    }
+    return await response
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.empty) {
+          commit('setNoMorePosts', true)
+          return
+        }
+        const lastVisible = querySnapshot.docs[querySnapshot.size - 1]
+        querySnapshot.forEach((doc) => {
+          const UpdatedFmt = moment(new Date(doc.data().updated)).format(
+            'DD-MMM-YYYY hh:mm'
+          ) // date object
+          recipeArray.push({
+            ...doc.data(),
+            id: doc.id,
+            updatedFmt: UpdatedFmt
+          }) // Using spread operator to add ID of the document to array
+        })
+        // eslint-disable-next-line no-console
+        // console.log(lastVisible.data().updated.toString())
+        commit('setLast', lastVisible.data().updated) // This is the cursor to be used for next set
+        commit('setTagSearchResults', recipeArray)
+      })
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.log('Something went wrong here, Enable Debug')
+        // make sure to change catch method to add (e) for debug .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.log(e)
+      })
+  },
+  setLoadMorePostsBoolean({ commit }, payload) {
+    commit('setNoMorePosts', payload)
+  },
+  tagSearchResultsBlank({ commit }) {
+    commit('setTagSearchResultsBlank')
   }
 }
 
@@ -243,6 +373,26 @@ export const mutations = {
   },
   addNewRecipeToList(state, recipe) {
     state.recipesList.unshift(recipe)
+  },
+  setCategories(state, payload) {
+    state.categories = payload
+  },
+  setCategorySearchResults(state, payload) {
+    state.categorySearchResults = payload
+    state.initialRecipesLoaded = true
+  },
+  addCategory(state, category) {
+    state.categories.push(category)
+  },
+  removeCategory(state, index) {
+    state.categories.splice(index, 1)
+  },
+  setTagSearchResults(state, payload) {
+    state.tagSearchResults = payload
+    state.initialRecipesLoaded = true
+  },
+  setTagSearchResultsBlank(state) {
+    state.tagSearchResults = []
   }
   // setRecipes: (state, recipesList) => (state.recipesList = recipesList)
 }

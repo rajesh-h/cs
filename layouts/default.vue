@@ -57,6 +57,8 @@
           ><v-img :src="require('~/static/logo.png')"></v-img
         ></router-link>
       </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-icon @click="gotoSearch">mdi-magnify</v-icon>
     </v-app-bar>
     <v-content>
       <v-container>
@@ -70,6 +72,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   data() {
     return {
@@ -82,6 +85,11 @@ export default {
           icon: 'mdi-home',
           title: 'Home',
           to: '/'
+        },
+        {
+          icon: 'mdi-playlist-check',
+          title: 'Categories',
+          to: '/categories'
         },
         {
           icon: 'mdi-chef-hat',
@@ -114,7 +122,18 @@ export default {
     toggleTheme() {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark
       localStorage.setItem('useDarkTheme', this.$vuetify.theme.dark.toString())
-    }
+    },
+    gotoSearch() {
+      this.setLoadMorePostsBoolean(true)
+      this.tagSearchResultsBlank()
+      this.$router.push({
+        name: 'search'
+      })
+    },
+    ...mapActions({
+      setLoadMorePostsBoolean: 'recipes/setLoadMorePostsBoolean',
+      tagSearchResultsBlank: 'recipes/tagSearchResultsBlank'
+    })
   }
 }
 </script>

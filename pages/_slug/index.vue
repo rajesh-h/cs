@@ -76,12 +76,12 @@
             <v-btn class="ma-2" tile disabled text>
               <v-icon left>mdi-calendar</v-icon>{{ recipe.updatedFmt }}
             </v-btn>
-            <v-btn icon color="secondary">
+            <!-- <v-btn icon color="secondary">
               <v-icon>mdi-bookmark-outline</v-icon>
             </v-btn>
             <v-btn icon color="secondary">
               <v-icon>mdi-share-variant</v-icon>
-            </v-btn>
+            </v-btn> -->
           </div>
           <div
             v-if="recipe.content"
@@ -103,6 +103,22 @@
               >
               </v-img>
             </div>
+          </div>
+          <div v-if="recipe.youtubeUrl">
+            <v-row>
+              <v-col cols="12">
+                <h3 class="text-center">RECIPE VIDEO</h3>
+                <div class="video-container">
+                  <iframe
+                    width="853"
+                    height="480"
+                    :src="recipe.youtubeUrl"
+                    frameborder="0"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              </v-col>
+            </v-row>
           </div>
           <h3 class="text-center">RECIPE CARD</h3>
           <div
@@ -234,8 +250,8 @@
             >
               {{ category }}
             </v-chip>
-          </div></v-col
-        >
+          </div>
+        </v-col>
       </client-only>
     </v-row>
   </v-container>
@@ -248,7 +264,8 @@ export default {
   },
 
   data: () => ({
-    loading: true
+    loading: true,
+    pageTitle: 'CookingShooking'
   }),
   computed: {
     ...mapGetters({
@@ -260,10 +277,42 @@ export default {
   },
   mounted() {
     this.loading = false
+    this.pageTitle = this.recipe.title
     // eslint-disable-next-line no-console
     // console.log(this.noRecipeFetched)
   },
-  methods: {}
+  methods: {},
+  head() {
+    return {
+      title: this.pageTitle,
+      meta: [
+        // hid is used as unique identifier. Do not use `vmid` for it as it will not work
+        {
+          hid: this.$route.params.slug,
+          name: this.pageTitle,
+          content: this.pageTitle
+        }
+      ]
+    }
+  }
 }
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  padding-top: 30px;
+  height: 0;
+  overflow: hidden;
+}
+
+.video-container iframe,
+.video-container object,
+.video-container embed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+</style>

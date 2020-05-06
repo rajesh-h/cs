@@ -180,6 +180,31 @@
               label="Featured Recipe"
               color="green"
             ></v-switch>
+            <v-expansion-panels>
+              <v-expansion-panel>
+                <v-expansion-panel-header
+                  >SEARCH KEYWORDS</v-expansion-panel-header
+                >
+                <v-expansion-panel-content>
+                  <v-text-field
+                    v-model="postTag"
+                    label="Please Enter Recipe Tags"
+                    @keydown.enter="addTag(postTag)"
+                  ></v-text-field>
+                  <div>
+                    <v-chip
+                      v-for="(tag, tindex) in recipeArray.postTags"
+                      :key="tindex"
+                      outlined
+                      class="ma-2"
+                      @click="removeTag(tindex)"
+                    >
+                      {{ tag }}
+                    </v-chip>
+                  </div>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </v-col>
           <v-col cols="12" class="text-center">
             <!-- <v-btn :disabled="!valid" color="info" @click="validate">
@@ -272,6 +297,7 @@ export default {
           featuredRecipe: false,
           featuredImage: '',
           categories: [],
+          postTags: [],
           created: '',
           updated: '',
           author: 'Yaman Agarwal'
@@ -280,6 +306,7 @@ export default {
     }
   },
   data: () => ({
+    postTag: '',
     pageTitle: 'Recipes',
     valid: true,
     categoriesList: [],
@@ -364,6 +391,7 @@ export default {
         featuredRecipe: false,
         featuredImage: '',
         categories: [],
+        postTags: [],
         created: '',
         updated: '',
         author: 'Yaman Agarwal'
@@ -399,6 +427,13 @@ export default {
         // console.log(this.recipeArray)
         // this.reset()
       }
+    },
+    addTag(tag) {
+      this.recipeArray.postTags.push(tag)
+      this.postTag = ''
+    },
+    removeTag(idx) {
+      this.recipeArray.postTags.splice(idx)
     }
   }
 }
