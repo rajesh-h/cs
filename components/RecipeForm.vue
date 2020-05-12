@@ -193,7 +193,7 @@
                   ></v-text-field>
                   <div>
                     <v-chip
-                      v-for="(tag, tindex) in recipeArray.postTags"
+                      v-for="(tag, tindex) in recipeArray.searchTags"
                       :key="tindex"
                       outlined
                       class="ma-2"
@@ -297,7 +297,7 @@ export default {
           featuredRecipe: false,
           featuredImage: '',
           categories: [],
-          postTags: [],
+          searchTags: [],
           created: '',
           updated: '',
           author: 'Yaman Agarwal'
@@ -391,7 +391,7 @@ export default {
         featuredRecipe: false,
         featuredImage: '',
         categories: [],
-        postTags: [],
+        searchTags: [],
         created: '',
         updated: '',
         author: 'Yaman Agarwal'
@@ -429,11 +429,11 @@ export default {
       }
     },
     addTag(tag) {
-      this.recipeArray.postTags.push(tag)
+      this.recipeArray.searchTags.push(tag)
       this.postTag = ''
     },
     removeTag(idx) {
-      this.recipeArray.postTags.splice(idx)
+      this.recipeArray.searchTags.splice(idx)
     }
   }
 }

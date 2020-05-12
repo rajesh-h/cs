@@ -305,7 +305,7 @@ export const actions = {
     } else {
       response = StoreDB.collection('recipes')
         .where('publish', '==', true)
-        .where('postTags', 'array-contains', payload.tag)
+        .where('searchTags', 'array-contains', payload.tag)
         .orderBy('updated', 'desc')
         .limit(payload.limit)
     }
